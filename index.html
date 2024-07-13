@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenStreetMap mit Koordinatenspeicherung</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>XML Daten Editor</h1>
+  <div id="map"></div>
+  <div id="xml"></div>
+  <button onclick="exportCoordinates()">Erstellen</button>
+
+  <script>
+    let coordinates = [];
+
+    function initMap() {
+      const map = L.map('map').setView([0, 0], 2); // Initialize map centered at (0,0) with zoom level 2
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+      }).addTo(map);
+
+      map.on('click', function(event) {
+        const { lat, lng } = event.latlng;
+        coordinates.push({ latitude: lat.toFixed(6), longitude: lng.toFixed(6) });
+        L.marker([lat, lng]).addTo(map);
+      });
+    }
+
+    function exportCoordinates() {
+      const xmlData = generateXML(coordinates);
+      
+    }
+
+    function generateXML(coordinates) {
+      let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<geodata>\n';
+      xml += '  <zone name="Tropisch">\n';
+      coordinates.forEach(coord => {
+        xml += `    <coordinates latitude="${coord.latitude}" longitude="${coord.longitude}"/>\n`;
+      });
+      xml += '    <coordinates latitude="' + coordinates[0].latitude + '" longitude="' + coordinates[0].longitude + '"/>\n'; // Closing the polygon
+      xml += '  </zone>\n</geodata>';
+      let out = document.getElementById('xml');
+      out.innerText = xml;
+      out.style.display = "block";
+      return xml;
+    }
+  </script>
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      initMap();
+    });
+  </script>
+</body>
+</html>
